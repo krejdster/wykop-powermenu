@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Dodaje ikony w górnej części strony, aby ułatwić nawigację po Wykopie
-// @version      0.3
+// @version      0.4
 // @released     2014-06-06
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
@@ -109,9 +109,18 @@ $('#allInOne, #showMoreTags').live('click', function(event) {
                         $('body', ifrm).empty().append(saver);
                         $('aside', ifrm).remove();
                         $('.newtagheader', ifrm).remove();
-                        $('body', ifrm).append('<style>.scale { margin-right:0 !important; margin-top:0 !important; } #body-con { margin:0 !important; } .wrapper { padding:0 !important; }</style>');
+                        $('head', ifrm).append('<base target="_parent">');
+                        $('body', ifrm).append('<style>.scale { margin-right:0 !important; margin-top:0 !important; } #body-con { margin:0 !important; } .wrapper { padding:0 !important; min-width: 0 !important;}</style>');
                         this.style.height = this.contentWindow.document.body.scrollHeight + 'px';
                         $(this).css('opacity','1');
+
+                            checkHeight = setInterval(function() {
+                                checkHeight = $('iframe').each(function(index,value) {
+                                    if( $(this).attr('id').match(/tag/i) ) {
+                                        $(this).height( $(this).contents().find('#body-con').height() + 25);
+                                    }
+                                });
+                            }, 2000);
                     });
                     ifn++;
                 } else {
@@ -126,7 +135,14 @@ $('#allInOne, #showMoreTags').live('click', function(event) {
     }, 200);
 });
 
-
+$(window).resize(function() {
+    $('iframe').each(function(index,value) {
+        if( $(this).attr('id').match(/tag/i) ) {
+            $(this).contents().find('section').width( $('section .scale').width()-10 );
+            $(this).height( $(this).contents().find('#body-con').height() + 25);
+        }
+    });
+});
 
 var notification_next_image = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAQCAYAAAAMJL+VAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAG2YAABzjgAA2e0AAIGfAAB/mgAA2GMAADIXAAAdLVvevdMAAAHVSURBVHjatJQ/aFNRFMZ/eYZXKkSlNJsUrZFk8Q9BUCouOriUFhwEY4cnWaSCWyguQsRSMIKodCwiomOHbC22Q2gxDtHNGCw0liC1r6JBpRXT9zn0BkKbVl9qP7hwL985555zvnsukmxJdyVV9H9QMfFsACSNaBdQKBRmHcexg0ASIJPJUCqV2Cmi0SipVIpIJNIDpKnfmEwmVSwWVyTdk7S3hfVY0rKkrnpMx3GWrMbbY7GYB5wAnvpI+hjwGjhozssNXNjaYBwGfgPtwJxx3g6jwBgQAL4BXRsNrCZOl4G6GGPA/SY254F54AAgo+ONZhkE14taYHDfHNw6uQhAwJqm58oAvamHpvRJoA9YNe3rNP4V4Op2JVq4ZRhNELe/ghRCCuGt9TP7fJwHlwaAL6YFn4AfQJvJ+jQw9DeBLCYewcr3zYy0H7ecNqWnG5j3QC+w9C8vIMiH/Nast3bB7GaADqOZ52cuLJ9z5PkdPIvuU7+2ZvdMtTDM5wCq1app0dnEE8pvrm/SoT0Eg8/6gZ+tfBm5XA5gMSDJfvdy/NWRj1PxtoW36+zRM3DxJoQP+Q7sui75fJ5sNkutVhsOaOg41z7HbeA2kAAOs3PMAy+AO38GAPWvcbCbhMN3AAAAAElFTkSuQmCC');";
 var tag_next_image = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAfCAYAAADnTu3OAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAG2YAABzjgAA2e0AAIGfAAB/mgAA2GMAADIXAAAdLVvevdMAAAHjSURBVHja7JUxaFNRFIa/G2MrDVUCooOrBgexoZtT261Ddtd0EC50yuTQIXVxfYPDC7gogovgkgSXQNshEV2SRawvESV5IUqjSCp9eX3R45BUnqkvfYWOOXCG+597/3P+c+/hKhHhLC3CGduUcEo4JZwS/p9QKYXfgSyQHsPSQNa3Dmcisiwi0mg0qlrrtA8Xx3H2tNbZ0TrQxyUnAcrlchJYGh1OAlSr1cujSk/VwwWAVqsFsONPYts2wHYYmVmffxIRyefz0ul0zBG2JSJSqVSkVqu9OkkyckrTWmcnEUaVUkprLYlEgkwmQ6FQoFgs/lVgmiaWZWEYxhG0CTwIlnz/9tCH8sQ0zWEVQ2xZRKRUKonWesvXpuAKR3tu8PjeOvY71lyX/fnoKvD86Kbb7TZALczTU9J+/4bc2iKHB9F/IjNzA9affeXq9Wu2bROLxXbj8fgXpdTKpL/83OZN9yHdz/PHIr+8CD+/Xewnln53u13led6FXq93pd/vr6ZSqadBhFE+vp0NTGe9ptlsRgzD+BFWcvSkDZZlAdRyudyK/+YnTUopMJq4Q71eDzchPsINZuYGxyLnZ93vi3fbY2MYinCXw4NbHwaX9jwiHrAPvMRzFzYePXnhOM522P4B/BkA1Fxrn1lD6CwAAAAASUVORK5CYII=');";
@@ -155,4 +171,4 @@ $('<div/>', {
     alt: "Czytaj następne powiadomienie"
 }).appendTo('header nav');
 
-$('body').append('<style>.customquickicon:hover {background-color:#1c1c1c; }</style>')
+$('body').append('<style>.customquickicon:hover {background-color:#1c1c1c; }</style>');
