@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Dodaje ikony w górnej części strony, aby ułatwić nawigację po Wykopie
-// @version      1.0
-// @released     2014-06-09
+// @version      1.1
+// @released     2014-06-30
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
 // @match        http://www.wykop.pl/*
@@ -16,7 +16,7 @@ $('body').on('click', '#nextTag', function(event) {
     // Dblclick button to get ajax working as
     // it needs to scrape unread notification urls
     $('body').append('<style id="niewidacheheszki">.menu-list { display:none !important; }</style>');
-    $('.notification.m-hide > a.ajax').trigger('click');
+    $('.notification.m-tag > a.ajax').trigger('click');
 
     // Checks if ajax complete
     checkIfShownNote = setInterval(function() {
@@ -24,7 +24,7 @@ $('body').on('click', '#nextTag', function(event) {
             clearInterval(checkIfShownNote);
             $('body').trigger('click');
 
-            $('.notification.m-hide .menu-list li:first a').each(function(index,value) {
+            $('.notification.m-tag .menu-list li:first a').each(function(index,value) {
                 if($(this).attr('href').match(/wpis/i)) {
                     hashHref = $(this).attr('href');
                     window.location.href = hashHref;
@@ -75,18 +75,18 @@ $('div#nav ul.clearfix:last > li.notification.m-user').before($('<li/>', {
     alt: "Czytaj następne powiadomienie"
 }));
 
-$('div#nav ul.clearfix:last > li.notification.m-hide').before($('<li/>', {
+$('div#nav ul.clearfix:last > li.notification.m-tag').before($('<li/>', {
     id: 'allTags',
     html: '<a class="dropdown-show hashtag" href="http://www.wykop.pl/powiadomienia/unreadtags/"><b class="" id="hashtagsNotificationsCount" style="background:#924396; font-size:0; display:block; padding:1px; top:22px; right:16px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b>#</a><div class="notificationsContainer"></div>',
-    class: "notification m-hide krejd-alltags",
+    class: "notification m-tag krejd-alltags",
     title: "Pokaż nieprzeczytane wpisy z tagów",
     alt: "Pokaż nieprzeczytane wpisy z tagów"
 }));
 
-$('div#nav ul.clearfix:last > li.notification.m-hide:not(.krejd-alltags)').before($('<li/>', {
+$('div#nav ul.clearfix:last > li.notification.m-tag:not(.krejd-alltags)').before($('<li/>', {
     id: 'nextTag',
     html: '<a class="dropdown-show hashtag" href="http://www.wykop.pl/powiadomienia/tagi/"><b class="" id="hashtagsNotificationsCount" style="background:#FF5917; font-size:0; display:block; padding:1px; top:22px; right:16px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b>#</a><div class="notificationsContainer"></div>',
-    class: "notification m-hide krejd-nexttag",
+    class: "notification m-tag krejd-nexttag",
     title: "Czytaj następny tag",
     alt: "Czytaj następny tag"
 }));
