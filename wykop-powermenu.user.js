@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Dodaje ikony w górnej części strony, aby ułatwić nawigację po Wykopie
-// @version      1.1
-// @released     2014-06-30
+// @version      1.2
+// @released     2017-05-09
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
-// @match        http://www.wykop.pl/*
+// @match        *://www.wykop.pl/*
 // @downloadURL  none
 // ==/UserScript==
+
+// Checks protocol
+var wykopProtocol = window.location.protocol;
 
 // Goes to next unread tag
 $('body').on('click', '#nextTag', function(event) {
@@ -20,7 +23,7 @@ $('body').on('click', '#nextTag', function(event) {
 
     // Checks if ajax complete
     checkIfShownNote = setInterval(function() {
-        if(jQuery.active == 0) {
+        if(jQuery.active === 0) {
             clearInterval(checkIfShownNote);
             $('body').trigger('click');
 
@@ -30,7 +33,7 @@ $('body').on('click', '#nextTag', function(event) {
                     window.location.href = hashHref;
                 }
             });
-            
+
             $('#niewidacheheszki').remove();
         }
     }, 50);
@@ -47,7 +50,7 @@ $('body').on('click', '#nextNote', function(event) {
 
     // Checks if ajax complete
     checkIfShownNote = setInterval(function() {
-        if(jQuery.active == 0) {
+        if(jQuery.active === 0) {
             clearInterval(checkIfShownNote);
             $('body').trigger('click');
 
@@ -69,7 +72,7 @@ $('body').on('click', '#nextNote', function(event) {
 
 $('div#nav ul.clearfix:last > li.notification.m-user').before($('<li/>', {
     id: 'nextNote',
-    html: '<a class="dropdown-show" href="http://www.wykop.pl/powiadomienia/do-mnie/"><i class="fa fa-envelope"></i><b class="" id="hashtagsNotificationsCount" style="background:#FF5917; font-size:0; display:block; padding:1px; top:22px; right:20px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b></a><div class="notificationsContainer"></div>',
+    html: '<a class="dropdown-show" href="'+wykopProtocol+'//www.wykop.pl/powiadomienia/do-mnie/"><i class="fa fa-envelope"></i><b class="" id="hashtagsNotificationsCount" style="background:#FF5917; font-size:0; display:block; padding:1px; top:22px; right:20px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b></a><div class="notificationsContainer"></div>',
     class: "notification m-user krejd-nextnotification",
     title: "Czytaj następne powiadomienie",
     alt: "Czytaj następne powiadomienie"
@@ -77,7 +80,7 @@ $('div#nav ul.clearfix:last > li.notification.m-user').before($('<li/>', {
 
 $('div#nav ul.clearfix:last > li.notification.m-tag').before($('<li/>', {
     id: 'allTags',
-    html: '<a class="dropdown-show hashtag" href="http://www.wykop.pl/powiadomienia/unreadtags/"><b class="" id="hashtagsNotificationsCount" style="background:#924396; font-size:0; display:block; padding:1px; top:22px; right:16px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b>#</a><div class="notificationsContainer"></div>',
+    html: '<a class="dropdown-show hashtag" href="'+wykopProtocol+'//www.wykop.pl/powiadomienia/unreadtags/"><b class="" id="hashtagsNotificationsCount" style="background:#924396; font-size:0; display:block; padding:1px; top:22px; right:16px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b>#</a><div class="notificationsContainer"></div>',
     class: "notification m-tag krejd-alltags",
     title: "Pokaż nieprzeczytane wpisy z tagów",
     alt: "Pokaż nieprzeczytane wpisy z tagów"
@@ -85,7 +88,7 @@ $('div#nav ul.clearfix:last > li.notification.m-tag').before($('<li/>', {
 
 $('div#nav ul.clearfix:last > li.notification.m-tag:not(.krejd-alltags)').before($('<li/>', {
     id: 'nextTag',
-    html: '<a class="dropdown-show hashtag" href="http://www.wykop.pl/powiadomienia/tagi/"><b class="" id="hashtagsNotificationsCount" style="background:#FF5917; font-size:0; display:block; padding:1px; top:22px; right:16px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b>#</a><div class="notificationsContainer"></div>',
+    html: '<a class="dropdown-show hashtag" href="'+wykopProtocol+'//www.wykop.pl/powiadomienia/tagi/"><b class="" id="hashtagsNotificationsCount" style="background:#FF5917; font-size:0; display:block; padding:1px; top:22px; right:16px; min-width:10px; width:10px; min-height:10px; height:10px; border-radius:5px; overflow:hidden;">&nbsp;</b>#</a><div class="notificationsContainer"></div>',
     class: "notification m-tag krejd-nexttag",
     title: "Czytaj następny tag",
     alt: "Czytaj następny tag"
