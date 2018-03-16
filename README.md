@@ -35,3 +35,25 @@ Kliknijcie w obrazek, aby przejść do serwisu YouTube.
 
 [![Prezentacja skryptu](https://raw.githubusercontent.com/krejdster/wykop-powermenu/master/docs/youtube.png)](https://www.youtube.com/watch?v=F-jcU0g4LoA)
 
+---
+
+## Changelog
+
+**Wersja 1.3 (16 marzec 2018)**
+
+- ___Poprawka kompatybilności:___ Wykop rozdzielił powiadomienia na powiadomienia pochodzące z PW (prywatnych wiadomości) oraz na powiadomienia pochodzące ze wszystkich innych części serwisu. Kliknięcie ikonki "koperty" zostało dostosowane tak, aby sprawdzać oba typy powiadomień. Jeśli użytkownik posiada nieodczytane PW oraz inne wiadomości, najpierw zostanie pokazany użytkownikowi nieodczytana PW.
+- ___Zmiana:___ kolejność przycisków została zmieniona. Wszystkie trzy przyciski pochodzące z dodatku PowerMenu znajdują się teraz obok siebie i zostały oddzielone separatorem - dzięki temu nie będą już zaburzały kolejności domyślnych przycisków Wykopu.
+
+**Wersja 1.2 (9 maj 2017)**
+
+- ___Poprawka kompatybilności:___ Wykop wprowadził obsługę HTTPS. Dodatek został przystosowany do tego, aby wspierać oba protokoły.
+
+
+**Wersja 1.1 (30 czerwiec 2014)**
+
+- Poprawki naprawiające kompatybilność ze zmianami na Wykopie
+
+
+**Wersja 1.0 (9 czerwiec 2014)**
+
+- Poprawki naprawiające kompatybilność ze zmianami na Wykopie
