@@ -34,6 +34,12 @@ Aby zainstalować skrypt, należy wykonać kilka prostych kroków.
 
 ## Changelog
 
+
+**Wersja 2.0.1 (17 marzec 2018)**
+
+- Zamiana kolejności ikon na właściwe.
+
+
 **Wersja 2.0 (17 marzec 2018)**
 
 - ___Zmiana:___ Od teraz wtyczka nie będzie już dodawała do menu kolejnych ikonek obok istniejących. Zostają one całkowicie zastąpione przyciskami PowerMenu. Działanie przycisków pozostało bez zmian w stosunku do poprzedniej wersji.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Dodaje ikony w górnej części strony, aby ułatwić nawigację po Wykopie
-// @version      2.0
+// @version      2.0.1
 // @released     2018-03-17
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
@@ -251,7 +251,7 @@ function addPowerSections() {
     handlerEl.insertAdjacentHTML('afterend', `
         <li id="powerSectionNotifications" class="power-section" title="Powiadomienia" alt="Powiadomienia">
             <a href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/do-mnie/" title="" class="ellipsis color-1">
-                <i class="fa fa-envelope"></i>
+                <i class="fa fa-bell"></i>
                 <span><b>powiadomienia</b></span>
                 <b class="power-section-badge">&nbsp;</b>
             </a>
@@ -261,7 +261,7 @@ function addPowerSections() {
     handlerEl.insertAdjacentHTML('afterend', `
         <li id="powerSectionPrivateMessages" class="power-section" title="Prywatne wiadomości" alt="Prywatne wiadomości">
             <a href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/wiadomosc-prywatna/" title="" class="ellipsis color-1">
-                <i class="fa fa-bell"></i>
+                <i class="fa fa-envelope"></i>
                 <span><b>wiadomości</b></span>
                 <b class="power-section-badge">&nbsp;</b>
             </a>
