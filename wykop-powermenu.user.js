@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Dodaje ikony w górnej części strony, aby ułatwić nawigację po Wykopie
-// @version      2.0.1
-// @released     2018-03-17
+// @version      2.1
+// @released     2018-03-20
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
 // @match        *://www.wykop.pl/*
@@ -32,6 +32,7 @@ var poller = setInterval(function(){
 window.onload = function() {
     bindReadNextNotificationEvent();
     bindReadNextTagEvent();
+    bindReadNextPmOrShowInboxEvent();
     bindBadgesCheck();
     makePowerButtonsClickable();
 };
@@ -259,8 +260,8 @@ function addPowerSections() {
     `);
 
     handlerEl.insertAdjacentHTML('afterend', `
-        <li id="powerSectionPrivateMessages" class="power-section" title="Prywatne wiadomości" alt="Prywatne wiadomości">
-            <a href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/wiadomosc-prywatna/" title="" class="ellipsis color-1">
+        <li id="powerSectionPrivateMessages" class="power-section" title="Skrzynka odbiorcza PM" alt="Skrzynka odbiorcza PM">
+            <a href="` + _getProtocol() + `//www.wykop.pl/wiadomosc-prywatna/" title="" class="ellipsis color-1">
                 <i class="fa fa-envelope"></i>
                 <span><b>wiadomości</b></span>
                 <b class="power-section-badge">&nbsp;</b>
@@ -330,6 +331,54 @@ function bindReadNextNotificationEvent() {
                     window.location.href = oldNotifications[0];
                 }
 
+                $('body').removeClass('power-hide');
+
+            }
+        }, 50);
+    });
+
+}
+
+function bindReadNextPmOrShowInboxEvent() {
+
+    $('body').on('click', '#powerSectionPrivateMessages', function(event) {
+        event.preventDefault();
+
+        // Lock event to make sure it doesn't loop infinitely
+
+        if(!flags.canClickNextMotification) {
+            return;
+        }
+
+        flags.canClickNextMotification = false;
+
+        $('body').addClass('power-hide');
+
+        // Click button to get latest PMs
+
+        $('.notification.m-user > a.ajax').trigger('click');
+
+        // Checks if ajax complete
+        checkIfShownNote = setInterval(function() {
+            if(jQuery.active === 0) {
+                clearInterval(checkIfShownNote);
+                flags.canClickNextMotification = true;
+                $('body').trigger('click');
+
+                var newPMs = [];
+
+                $('.notification.m-user .menu-list li.type-light-warning a').each(function(index,value) {
+                    if($(this).attr('href').match(/wpis/i) || $(this).attr('href').match(/konwersacja/i) || $(this).attr('href').match(/comment/i)) {
+                        var hashHref = $(this).attr('href');
+                        newPMs.push(hashHref);
+                    }
+                });
+
+                if(newPMs.length === 0) {
+                    window.location.href = $('#powerSectionPrivateMessages a').attr('href');
+                } else {
+                    window.location.href = newPMs[0];
+                }
                 $('body').removeClass('power-hide');
 
             }

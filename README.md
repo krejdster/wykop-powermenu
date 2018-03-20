@@ -35,6 +35,11 @@ Aby zainstalować skrypt, należy wykonać kilka prostych kroków.
 ## Changelog
 
 
+**Wersja 2.1 (20 marzec 2018)**
+
+- ___Zmiana:___ W rozwijalnym menu użytkownika - kliknięcie pozycji "wiadomości" przenosi od teraz do pierwszej z góry nieodczytanej wiadomości prywatnej lub (jeśli użytkownik nie posiada nieodczytanych PM) bezpośrednio do panelu wiadomości prywatnych.
+
+
 **Wersja 2.0.1 (17 marzec 2018)**
 
 - Zamiana kolejności ikon na właściwe.
