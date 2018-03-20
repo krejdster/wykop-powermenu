@@ -42,7 +42,7 @@ window.onload = function() {
 // ######################
 
 var flags = {
-    canClickNextMotification: true,
+    canClickNextNotification: true,
     canClickNextTag: true
 };
 
@@ -278,11 +278,11 @@ function bindReadNextNotificationEvent() {
 
         // Lock event to make sure it doesn't loop infinitely
 
-        if(!flags.canClickNextMotification) {
+        if(!flags.canClickNextNotification) {
             return;
         }
 
-        flags.canClickNextMotification = false;
+        flags.canClickNextNotification = false;
 
         $('body').addClass('power-hide');
 
@@ -296,7 +296,7 @@ function bindReadNextNotificationEvent() {
         checkIfShownNote = setInterval(function() {
             if(jQuery.active === 0) {
                 clearInterval(checkIfShownNote);
-                flags.canClickNextMotification = true;
+                flags.canClickNextNotification = true;
                 $('body').trigger('click');
 
                 // Prioritizes PMs over regular notifications
@@ -346,11 +346,11 @@ function bindReadNextPmOrShowInboxEvent() {
 
         // Lock event to make sure it doesn't loop infinitely
 
-        if(!flags.canClickNextMotification) {
+        if(!flags.canClickNextNotification) {
             return;
         }
 
-        flags.canClickNextMotification = false;
+        flags.canClickNextNotification = false;
 
         $('body').addClass('power-hide');
 
@@ -362,7 +362,7 @@ function bindReadNextPmOrShowInboxEvent() {
         checkIfShownNote = setInterval(function() {
             if(jQuery.active === 0) {
                 clearInterval(checkIfShownNote);
-                flags.canClickNextMotification = true;
+                flags.canClickNextNotification = true;
                 $('body').trigger('click');
 
                 var newPMs = [];
