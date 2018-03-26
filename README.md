@@ -1,7 +1,8 @@
 ## Czym jest dodatek Wykop PowerMenu?
 
 Jest to prosta wtyczka `user.js`, która lekko poprawia użyteczność serwisu Wykop.pl. Przyspiesza i ułatwia korzystanie z podstawowych funkcjonalności, takich jak:
-- Szybkie odczytywanie nowych powiadomień z mikrobloga, wykopalisk i prywatnych wiadomości
+- Szybkie odczytywanie nowych powiadomień z mikrobloga i wykopalisk
+- Szybkie odczytywanie nowych wiadomości prywatnych
 - Szybkie odczytywanie nowych wpisów z obserwowanych tagów
 - Pokazywanie 50 najnowszych wpisów z obserwowanych tagów na jednej stronie
 
@@ -17,7 +18,7 @@ Nie tylko dla wykopowych power userów ;).
 
 ## Instalacja
 
-Aby zainstalować skrypt, należy wykonać kilka prostych kroków.
+Aby zainstalować skrypt, należy wykonać dwa proste kroki.
 
 1. Zainstaluj dodatek pozwalający na instalację skryptów `user.js` w twojej przeglądarce.
 	* Dla przeglądarki Chrome: [Tampermonkey w Chrome Web Store](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
@@ -34,6 +35,12 @@ Aby zainstalować skrypt, należy wykonać kilka prostych kroków.
 
 ## Changelog
 
+
+**Wersja 3.0 (26 marzec 2018)**
+
+- ___Nowość:___ Funkcjonalność dodana na prośbę użytkowników - po najechaniu na przycisk, pojawia się wykopowy panel z wpisami dla danej sekcji powiadomień. Bezpośrednie kliknięcie w przycisk - niezmiennie przenosi do najnowszego nieodczytanego powiadomienia.
+- ___Nowość:___ Wróciła ikonka dzwoneczka, której kliknięcie powoduje przejście do najnowszego powiadomienia z wykopaliska lub mikrobloga.
+- ___Zmiana:___ Kliknięcie ikonki koperty powoduje teraz przejście do najnowszej wiadomości prywatnej.
 
 **Wersja 2.1 (20 marzec 2018)**
 

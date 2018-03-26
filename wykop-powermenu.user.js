@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
-// @description  Dodaje ikony w górnej części strony, aby ułatwić nawigację po Wykopie
-// @version      2.1
-// @released     2018-03-20
+// @description  Wprowadza klikalne ikonki powiadomień i dodatkowe przycisku w menu.
+// @version      3.0
+// @released     2018-03-26
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
 // @match        *://www.wykop.pl/*
@@ -10,14 +10,18 @@
 // @downloadURL  none
 // ==/UserScript==
 
-hideOriginalButtons();
+// ######################
+// #### Initialize
+// ######################
+
+// Inject styles immediately
+
 injectPowerStyles();
 
-/**
- * Add buttons and sections when top menu is loaded
-*/
-var poller = setInterval(function(){
-    if(document.querySelector('div#nav .dropdown.right.m-hide') !== null) {
+// Add buttons and sections as soon as top menu is loaded
+
+let poller = setInterval(function () {
+    if (document.querySelector('div#nav .dropdown.right.m-hide') !== null) {
         clearInterval(poller);
 
         addPowerButtons();
@@ -26,25 +30,46 @@ var poller = setInterval(function(){
     }
 }, 50);
 
-/**
- * Bind events once jQuery is available in the scope
-*/
-window.onload = function() {
-    bindReadNextNotificationEvent();
-    bindReadNextTagEvent();
-    bindReadNextPmOrShowInboxEvent();
+// Bind events when page is loaded
+
+window.onload = function () {
+    bindButtonEvents('bell', '.bell', '#powerButtonNextNotification');
+    bindButtonEvents('envelope', '.m-user', '#powerButtonNextPrivateMessage');
+    bindButtonEvents('tag', '.m-tag', '#powerButtonNextTag');
     bindBadgesCheck();
     makePowerButtonsClickable();
 };
 
 // ######################
-// #### Power Menu
+// #### Addon state
 // ######################
 
-var flags = {
-    canClickNextNotification: true,
-    canClickNextTag: true
+let debounceTime = 10000;
+
+let addonState = {
+    bell: {
+        debounceIntervalHandler: null,
+        flagIsInitialized: false,
+        flagCanUpdate: true,
+        links: []
+    },
+    envelope: {
+        debounceIntervalHandler: null,
+        flagIsInitialized: false,
+        flagCanUpdate: true,
+        links: []
+    },
+    tag: {
+        debounceIntervalHandler: null,
+        flagIsInitialized: false,
+        flagCanUpdate: true,
+        links: []
+    }
 };
+
+// ######################
+// #### CSS / DOM
+// ######################
 
 function injectPowerStyles() {
 
@@ -53,23 +78,29 @@ function injectPowerStyles() {
 
             /* Essentials */
 
-            body.power-hide .menu-list {
-                display:none !important;
+            .force-display .notificationsContainer {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
             }
 
-            div.dropdown.m-hide {
-                width: 180px !important;
-                margin-left: -140px !important;
-            }
+            /* Not active buttons */
 
-            div.dropdown.m-hide ul li {
-                position: relative;
-            }
-
+            #powerButtonNextPrivateMessage:not(.not-active-yet),
             #powerButtonNextNotification:not(.not-active-yet),
             #powerButtonNextTag:not(.not-active-yet),
             #powerButtonAllTags {
                 cursor: pointer;
+            }
+
+            /* Hide original buttons */
+
+            li.notification.bell a.dropdown-show.ajax,
+            li.notification.m-user a.dropdown-show.ajax,
+            li.notification.m-tag a.dropdown-show.ajax
+            {
+                display: none;
+                pointer-events: none;
             }
 
             /* Button styles */
@@ -95,6 +126,10 @@ function injectPowerStyles() {
                 overflow: hidden;
             }
 
+            .power-button-count {
+                pointer-events: none;
+            }
+
             .power-button.no-notifications .power-button-count {
                 display: none !important;
             }
@@ -104,6 +139,19 @@ function injectPowerStyles() {
             }
 
             /* Section styles */
+
+            li.notification .dropdown.right {
+                margin-left: -260px
+            }
+
+            div.dropdown.m-hide {
+                width: 180px !important;
+                margin-left: -140px !important;
+            }
+
+            div.dropdown.m-hide ul li {
+                position: relative;
+            }
 
             .power-section .power-section-badge {
                 position: absolute;
@@ -129,118 +177,68 @@ function injectPowerStyles() {
 
 }
 
-function hideOriginalButtons() {
-
-    (document.head || document.documentElement).insertAdjacentHTML('beforeend', `
-        <style>
-            li.notification.bell,
-            li.notification.m-user:not(#powerButtonNextNotification),
-            li.notification.m-tag:not(#powerButtonNextTag):not(#powerButtonAllTags)
-            {
-                display: none;
-            }
-        </style>
-    `);
-
-}
-
-function updatePowerBadgesCount() {
-
-    // Get numbers of notifications
-
-    var pmCount            = document.querySelector('#pmNotificationsCount').innerHTML;
-    var notificationsCount = document.querySelector('#notificationsCount').innerHTML;
-    var tagsCount          = document.querySelector('#hashtagsNotificationsCount').innerHTML;
-
-    pmCount                = pmCount ? +pmCount : 0;
-    notificationsCount     = notificationsCount ? +notificationsCount : 0;
-    tagsCount              = tagsCount ? +tagsCount : 0;
-    var totalMessagesCount = pmCount + notificationsCount;
-
-    // Update badges count (for buttons)
-
-    document.querySelector('#powerButtonNextNotification .power-button-count').innerHTML = 
-        (pmCount === 0 ? '-' : pmCount) +
-        '/' +
-        (notificationsCount === 0 ? '-' : notificationsCount);
-    document.querySelector('#powerButtonNextTag .power-button-count').innerHTML = tagsCount;
-
-    // Update badges count (for sections)
-
-    document.querySelector('#powerSectionPrivateMessages .power-section-badge').innerHTML = pmCount;
-    document.querySelector('#powerSectionNotifications .power-section-badge').innerHTML = notificationsCount;
-    document.querySelector('#powerSectionTags .power-section-badge').innerHTML = tagsCount;
-
-    // Update badges style (for buttons)
-
-    if(totalMessagesCount === 0) _addClass('#powerButtonNextNotification', 'no-notifications');
-    if(totalMessagesCount > 0) _removeClass('#powerButtonNextNotification', 'no-notifications');
-    if(tagsCount === 0) _addClass('#powerButtonNextTag', 'no-notifications');
-    if(tagsCount > 0) _removeClass('#powerButtonNextTag', 'no-notifications');
-    if(tagsCount === 0) _addClass('#powerButtonAllTags', 'no-notifications');
-    if(tagsCount > 0) _removeClass('#powerButtonAllTags', 'no-notifications');
-
-    // Update badges style (for sections)
-
-    if(pmCount === 0) _addClass('#powerSectionPrivateMessages', 'no-notifications');
-    if(pmCount > 0) _removeClass('#powerSectionPrivateMessages', 'no-notifications');
-    if(notificationsCount === 0) _addClass('#powerSectionNotifications', 'no-notifications');
-    if(notificationsCount > 0) _removeClass('#powerSectionNotifications', 'no-notifications');
-    if(tagsCount === 0) _addClass('#powerSectionTags', 'no-notifications');
-    if(tagsCount > 0) _removeClass('#powerSectionTags', 'no-notifications');
-
-}
-
 function addPowerButtons() {
 
     // Find handler element
 
-    var topBarSections      = document.body.querySelectorAll('div#nav ul.clearfix');
-    var topBarSectionsNodes = topBarSections.length;
-    var rightSection        = topBarSections[topBarSectionsNodes-1];
-    var handlerEl           = rightSection.querySelector('li.notification.bell');
+    let bellContainer = document.body.querySelector('.notification.bell');
+    let envelopeContainer = document.body.querySelector('.notification.m-user');
+    let tagContainer = document.body.querySelector('.notification.m-tag');
 
     // Append buttons
 
-    handlerEl.insertAdjacentHTML('beforebegin', `
-        <li id="powerButtonNextNotification" class="notification m-user power-button not-active-yet" title="Czytaj następną wiadomość prywatną lub powiadomienie" alt="Czytaj następną wiadomość prywatną lub powiadomienie">
-            <a class="dropdown-show">
-                <i class="fa fa-envelope"></i>
-                <b class="power-button-count">&nbsp;</b>
-            </a>
-            <div class="notificationsContainer"></div>
-        </li>
+    bellContainer.insertAdjacentHTML('beforeend', `
+        <a id="powerButtonNextNotification" class="dropdown-show power-button not-active-yet" title="Czytaj następne powiadomienie" alt="Czytaj następne powiadomienie">
+            <img src="/img/w4/ico-bell-svg.svg" alt="">
+            <b class="power-button-count">&nbsp;</b>
+        </a>
     `);
 
-    handlerEl.insertAdjacentHTML('beforebegin', `
-        <li id="powerButtonNextTag" class="notification m-tag power-button not-active-yet" title="Czytaj następny tag" alt="Czytaj następny tag">
-            <a class="dropdown-show hashtag">
-                <b class="power-button-count">&nbsp;</b>
-                #
-            </a>
-            <div class="notificationsContainer"></div>
-        </li>
+    envelopeContainer.insertAdjacentHTML('beforeend', `
+        <a id="powerButtonNextPrivateMessage" class="dropdown-show power-button not-active-yet" title="Czytaj następną wiadomość prywatną" alt="Czytaj następną wiadomość prywatną">
+            <i class="fa fa-envelope"></i>
+            <b class="power-button-count">&nbsp;</b>
+        </a>
     `);
 
-    handlerEl.insertAdjacentHTML('beforebegin', `
-        <li id="powerButtonAllTags" class="notification m-tag power-button" title="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów" alt="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów">
-            <a class="dropdown-show hashtag" href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/unreadtags/">
-                <div class="power-button-circle">&nbsp;</div>
-                #
-            </a>
-            <div class="notificationsContainer"></div>
-        </li>
+    tagContainer.insertAdjacentHTML('beforeend', `
+        <a id="powerButtonNextTag" class="dropdown-show hashtag power-button not-active-yet" title="Czytaj następny wpis z tagów" alt="Czytaj następny wpis z tagów">
+            <b class="power-button-count">&nbsp;</b>
+            #
+        </a>
+    `);
+
+    tagContainer.insertAdjacentHTML('beforeend', `
+        <a id="powerButtonAllTags" class="dropdown-show hashtag power-button not-active-yet" href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/unreadtags/" title="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów" alt="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów">
+            <div class="power-button-circle">&nbsp;</div>
+            #
+        </a>
     `);
 
 }
 
 function addPowerSections() {
 
-    var userMenuElements  = document.body.querySelectorAll('div.dropdown.m-hide ul li');
-    var handlerEl         = userMenuElements[0];
+    let handlerEl = document.body.querySelectorAll('div.dropdown.m-hide ul li')[0];
 
-    handlerEl.insertAdjacentHTML('afterend', `
-        <li id="powerSectionTags" class="power-section" title="Pokaż tagi" alt="Pokaż tagi">
+    handlerEl.insertAdjacentHTML('beforeend', `
+        <li id="powerSectionNotifications" class="power-section" title="Panel powiadomień" alt="Panel powiadomień">
+            <a href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/do-mnie/" title="" class="ellipsis color-1">
+                <i class="fa fa-bell-o"></i>
+                <span><b>powiadomienia</b></span>
+                <b class="power-section-badge">&nbsp;</b>
+            </a>
+        </li>
+
+        <li id="powerSectionPrivateMessages" class="power-section" title="Skrzynka odbiorcza PM" alt="Skrzynka odbiorcza PM">
+            <a href="` + _getProtocol() + `//www.wykop.pl/wiadomosc-prywatna/" title="" class="ellipsis color-1">
+                <i class="fa fa-envelope"></i>
+                <span><b>wiadomości</b></span>
+                <b class="power-section-badge">&nbsp;</b>
+            </a>
+        </li>
+
+        <li id="powerSectionTags" class="power-section" title="Panel powiadomień z tagów" alt="Panel powiadomień z tagów">
             <a href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/tagi/" title="" class="ellipsis color-1">
                 <i class="fa fa-tag"></i>
                 <span><b>tagi</b></span>
@@ -249,227 +247,276 @@ function addPowerSections() {
         </li>
     `);
 
-    handlerEl.insertAdjacentHTML('afterend', `
-        <li id="powerSectionNotifications" class="power-section" title="Powiadomienia" alt="Powiadomienia">
-            <a href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/do-mnie/" title="" class="ellipsis color-1">
-                <i class="fa fa-bell"></i>
-                <span><b>powiadomienia</b></span>
-                <b class="power-section-badge">&nbsp;</b>
-            </a>
-        </li>
-    `);
+}
 
-    handlerEl.insertAdjacentHTML('afterend', `
-        <li id="powerSectionPrivateMessages" class="power-section" title="Skrzynka odbiorcza PM" alt="Skrzynka odbiorcza PM">
-            <a href="` + _getProtocol() + `//www.wykop.pl/wiadomosc-prywatna/" title="" class="ellipsis color-1">
-                <i class="fa fa-envelope"></i>
-                <span><b>wiadomości</b></span>
-                <b class="power-section-badge">&nbsp;</b>
-            </a>
-        </li>
-    `);
+/**
+ * Make power buttons clickable
+ *
+ * Once document is loaded, removes opacity from buttons
+ * to indicate that user can click them from now on.
+ *
+ * This is necessary because notifications are not loaded
+ * with the DOM. Server request is necessary to get them
+ * for particular section.
+*/
+function makePowerButtonsClickable() {
+
+    _removeClass('#powerButtonNextNotification', 'not-active-yet');
+    _removeClass('#powerButtonNextPrivateMessage', 'not-active-yet');
+    _removeClass('#powerButtonNextTag', 'not-active-yet');
+    _removeClass('#powerButtonAllTags', 'not-active-yet');
 
 }
 
-function bindReadNextNotificationEvent() {
+/**
+ * Update power badges count
+ *
+ * Updates the badges for all notifications and applies
+ * proper CSS rules based on its number.
+ *
+ * This function is injected to each XHR request.
+*/
+function updatePowerBadgesCount() {
 
-    $('body').on('click', '#powerButtonNextNotification', function(event) {
+    // Get numbers of notifications
+
+    let bellCount = document.querySelector('#notificationsCount').innerHTML;
+    let envelopeCount = document.querySelector('#pmNotificationsCount').innerHTML;
+    let tagCount = document.querySelector('#hashtagsNotificationsCount').innerHTML;
+
+    envelopeCount = envelopeCount ? +envelopeCount : 0;
+    bellCount = bellCount ? +bellCount : 0;
+    tagCount = tagCount ? +tagCount : 0;
+
+    // Update badges count (for buttons)
+
+    document.querySelector('#powerButtonNextNotification .power-button-count').innerHTML = bellCount;
+    document.querySelector('#powerButtonNextPrivateMessage .power-button-count').innerHTML = envelopeCount;
+    document.querySelector('#powerButtonNextTag .power-button-count').innerHTML = tagCount;
+
+    // Update badges count (for sections)
+
+    document.querySelector('#powerSectionNotifications .power-section-badge').innerHTML = bellCount;
+    document.querySelector('#powerSectionPrivateMessages .power-section-badge').innerHTML = envelopeCount;
+    document.querySelector('#powerSectionTags .power-section-badge').innerHTML = tagCount;
+
+    // Update badges style (for buttons)
+
+    if (bellCount === 0) _addClass('#powerButtonNextNotification', 'no-notifications');
+    if (bellCount > 0) _removeClass('#powerButtonNextNotification', 'no-notifications');
+    if (envelopeCount === 0) _addClass('#powerButtonNextPrivateMessage', 'no-notifications');
+    if (envelopeCount > 0) _removeClass('#powerButtonNextPrivateMessage', 'no-notifications');
+    if (tagCount === 0) _addClass('#powerButtonNextTag', 'no-notifications');
+    if (tagCount > 0) _removeClass('#powerButtonNextTag', 'no-notifications');
+    if (tagCount === 0) _addClass('#powerButtonAllTags', 'no-notifications');
+    if (tagCount > 0) _removeClass('#powerButtonAllTags', 'no-notifications');
+
+    // Update badges style (for sections)
+
+    if (bellCount === 0) _addClass('#powerSectionNotifications', 'no-notifications');
+    if (bellCount > 0) _removeClass('#powerSectionNotifications', 'no-notifications');
+    if (envelopeCount === 0) _addClass('#powerSectionPrivateMessages', 'no-notifications');
+    if (envelopeCount > 0) _removeClass('#powerSectionPrivateMessages', 'no-notifications');
+    if (tagCount === 0) _addClass('#powerSectionTags', 'no-notifications');
+    if (tagCount > 0) _removeClass('#powerSectionTags', 'no-notifications');
+
+}
+
+// ######################
+// #### Logic
+// ######################
+
+/**
+ * Bind button events
+ *
+ * Binds all necessary events to each new power button.
+ *
+ * @param {String} sourceId Internal name for the notification type
+ * @param {String} sourceClass Class of the original button
+ * @param {String} powerButtonId ID of the new button
+*/
+function bindButtonEvents(sourceId, sourceClass, powerButtonId) {
+
+    // Mouse enter
+
+    $('body').on('mouseenter', powerButtonId, function (event) {
         event.preventDefault();
 
-        // Lock event to make sure it doesn't loop infinitely
+        $('.notification' + sourceClass).addClass('force-display');
 
-        if(!flags.canClickNextNotification) {
+        if (!addonState[sourceId].flagCanUpdate) {
             return;
         }
 
-        flags.canClickNextNotification = false;
+        addonState[sourceId].flagCanUpdate = false;
 
-        $('body').addClass('power-hide');
+        _RequestNotificationRefresh(sourceId, sourceClass)
+            .then(function () {
+                addonState[sourceId].links = _parseLinksFromNotificationContainer(sourceClass);
+                addonState[sourceId].flagIsInitialized = true;
 
-        // Click buttons to get ajax working as it
-        // needs to scrape unread notification list
+                setTimeout(function () {
+                    addonState[sourceId].flagCanUpdate = true;
+                }, debounceTime);
+            });
 
-        $('.notification.m-user > a.ajax').trigger('click');
-        $('.notification.bell > a.ajax').trigger('click');
+    });
 
-        // Checks if ajax complete
-        checkIfShownNote = setInterval(function() {
-            if(jQuery.active === 0) {
-                clearInterval(checkIfShownNote);
-                flags.canClickNextNotification = true;
-                $('body').trigger('click');
+    // Mouse leave
 
-                // Prioritizes PMs over regular notifications
+    $('body').on('mouseleave', sourceClass, function (event) {
+        $('.notification' + sourceClass).removeClass('force-display');
+    });
 
-                var newNotifications = [];
-                var oldNotifications = [];
+    // Click
 
-                $('.notification.m-user .menu-list li.type-light-warning a').each(function(index,value) {
-                    if($(this).attr('href').match(/wpis/i) || $(this).attr('href').match(/konwersacja/i) || $(this).attr('href').match(/comment/i)) {
-                        var hashHref = $(this).attr('href');
-                        newNotifications.push(hashHref);
+    $('body').on('click', powerButtonId, function (event) {
+
+        event.preventDefault();
+
+        // Check if debounce interval is running.
+        // If so, try to run this code again once it's done.
+
+        if (addonState[sourceId].debounceIntervalHandler !== null) {
+            setTimeout(function () {
+                $(powerButtonId).trigger('click');
+            }, 100);
+            return;
+        }
+
+        // Notifications were already downloaded but user has no data.
+        // This should only happen when user has zero notificaitons
+        // of specific type.
+
+        if (addonState[sourceId].flagIsInitialized && addonState[sourceId].links.length === 0) {
+            alert('Nie masz żadnych powiadomień.');
+        }
+
+        // Notifications were already downloaded and user has some data.
+        // Redirects user to notification.
+
+        if (addonState[sourceId].flagIsInitialized && addonState[sourceId].links.length > 0) {
+            window.location = addonState[sourceId].links[0].url;
+        }
+
+        // Notifications were not downloaded yet.
+        // By default, all notifications should be downloaded
+        // as soon as mouse enters button (mouseenter event).
+        // This is here just in case these were not downloaded
+        // for some reason (weird browser event handling maybe?)
+
+        if (!addonState[sourceId].flagIsInitialized) {
+            _RequestNotificationRefresh(sourceId, sourceClass)
+                .then(function () {
+                    addonState[sourceId].links = _parseLinksFromNotificationContainer(sourceClass);
+                    addonState[sourceId].flagIsInitialized = true;
+
+                    if (addonState[sourceId].links.length === 0) {
+                        alert('Nie masz żadnych powiadomień');
+                    } else {
+                        window.location = addonState[sourceId].links[0].url;
                     }
+
                 });
+        }
 
-                $('.notification.bell .menu-list li.type-light-warning a').each(function(index,value) {
-                    if($(this).attr('href').match(/wpis/i) || $(this).attr('href').match(/konwersacja/i) || $(this).attr('href').match(/comment/i)) {
-                        var hashHref = $(this).attr('href');
-                        newNotifications.push(hashHref);
-                    }
-                });
-
-                $('.notification.bell .menu-list li a').each(function(index,value) {
-                    if($(this).attr('href').match(/wpis/i) || $(this).attr('href').match(/konwersacja/i) || $(this).attr('href').match(/comment/i)) {
-                        var hashHref = $(this).attr('href');
-                        oldNotifications.push(hashHref);
-                    }
-                });
-
-                if(newNotifications.length > 0) {
-                    window.location.href = newNotifications[0];
-                } else {
-                    window.location.href = oldNotifications[0];
-                }
-
-                $('body').removeClass('power-hide');
-
-            }
-        }, 50);
     });
 
 }
 
-function bindReadNextPmOrShowInboxEvent() {
-
-    $('body').on('click', '#powerSectionPrivateMessages', function(event) {
-        event.preventDefault();
-
-        // Lock event to make sure it doesn't loop infinitely
-
-        if(!flags.canClickNextNotification) {
-            return;
-        }
-
-        flags.canClickNextNotification = false;
-
-        $('body').addClass('power-hide');
-
-        // Click button to get latest PMs
-
-        $('.notification.m-user > a.ajax').trigger('click');
-
-        // Checks if ajax complete
-        checkIfShownNote = setInterval(function() {
-            if(jQuery.active === 0) {
-                clearInterval(checkIfShownNote);
-                flags.canClickNextNotification = true;
-                $('body').trigger('click');
-
-                var newPMs = [];
-
-                $('.notification.m-user .menu-list li.type-light-warning a').each(function(index,value) {
-                    if($(this).attr('href').match(/wpis/i) || $(this).attr('href').match(/konwersacja/i) || $(this).attr('href').match(/comment/i)) {
-                        var hashHref = $(this).attr('href');
-                        newPMs.push(hashHref);
-                    }
-                });
-
-                if(newPMs.length === 0) {
-                    window.location.href = $('#powerSectionPrivateMessages a').attr('href');
-                } else {
-                    window.location.href = newPMs[0];
-                }
-                $('body').removeClass('power-hide');
-
-            }
-        }, 50);
-    });
-
-}
-
-function bindReadNextTagEvent() {
-
-    $('body').on('click', '#powerButtonNextTag', function(event) {
-        event.preventDefault();
-
-        // Lock event to make sure it doesn't loop infinitely
-
-        if(!flags.canClickNextTag) {
-            return;
-        }
-
-        flags.canClickNextTag = false;
-
-        $('body').addClass('power-hide');
-
-        // Click button to get ajax working as it
-        // needs to scrape unread notification list
-
-        $('.notification.m-tag > a.ajax').trigger('click');
-
-        // Checks if ajax complete
-        checkIfShownNote = setInterval(function() {
-            if(jQuery.active === 0) {
-                clearInterval(checkIfShownNote);
-                flags.canClickNextTag = true;
-                $('body').trigger('click');
-
-                $('.notification.m-tag .menu-list li:first a').each(function(index,value) {
-                    if($(this).attr('href').match(/wpis\//i)) {
-                        var hashHref = $(this).attr('href');
-                        window.location.href = hashHref;
-                    }
-                });
-
-                $('body').removeClass('power-hide');
-            }
-        }, 50);
-    });
-
-}
-
+/**
+ * Bind badges check
+ *
+ * Binds additional code to each XHR request.
+*/
 function bindBadgesCheck() {
 
-    addXMLRequestCallback(function(xhr) {
+    addXMLRequestCallback(function () {
         updatePowerBadgesCount();
     });
 
 }
 
-function makePowerButtonsClickable() {
+/**
+ * Request notification refresh
+ *
+ * Wraps tricky method to check if there are new notifications
+ * in a simple promise.
+ *
+ * @private
+*/
+function _RequestNotificationRefresh(source, sourceClass) {
 
-    _removeClass('#powerButtonNextNotification', 'not-active-yet');
-    _removeClass('#powerButtonNextTag', 'not-active-yet');
+    let sourceElement = '.notification' + sourceClass + ' > a.ajax';
+
+    return new Promise(function (resolve) {
+
+        $(sourceElement).trigger('click');
+
+        addonState[source].debounceIntervalHandler = setInterval(function () {
+            if (jQuery.active === 0) {
+                clearInterval(addonState[source].debounceIntervalHandler);
+                addonState[source].debounceIntervalHandler = null;
+                updatePowerBadgesCount();
+                resolve();
+            }
+        }, 50);
+    });
+
+}
+
+/**
+ * Parse links from notification container
+ *
+ * @private
+*/
+function _parseLinksFromNotificationContainer(sourceClass) {
+
+    let sourceElement = '.notification' + sourceClass + ' .menu-list li:not(.buttons) a';
+
+    let links = [];
+
+    $(sourceElement).each(function (index, value) {
+        let href = $(this).attr('href');
+        if (href.match(/wpis\//i) || href.match(/wiadomosc-prywatna/i)) {
+            links.push({
+                url: $(this).attr('href'),
+                isNew: !!$(this).closest('li').hasClass('type-light-warning')
+            });
+        }
+    });
+
+    return links;
 
 }
 
 // ######################
-// #### Helper functions
+// #### Helpers
 // ######################
 
 /**
  * Source: https://stackoverflow.com/a/5202999
  */
-function addXMLRequestCallback(callback){
-    var oldSend, i;
-    if( XMLHttpRequest.callbacks ) {
+function addXMLRequestCallback(callback) {
+    let oldSend, i;
+    if (XMLHttpRequest.callbacks) {
         // we've already overridden send() so just add the callback
-        XMLHttpRequest.callbacks.push( callback );
+        XMLHttpRequest.callbacks.push(callback);
     } else {
         // create a callback queue
         XMLHttpRequest.callbacks = [callback];
         // store the native send()
         oldSend = XMLHttpRequest.prototype.send;
         // override the native send()
-        XMLHttpRequest.prototype.send = function(){
+        XMLHttpRequest.prototype.send = function () {
             // process the callback queue
             // the xhr instance is passed into each callback but seems pretty useless
             // you can't tell what its destination is or call abort() without an error
             // so only really good for logging that a request has happened
             // I could be wrong, I hope so...
             // EDIT: I suppose you could override the onreadystatechange handler though
-            for( i = 0; i < XMLHttpRequest.callbacks.length; i++ ) {
-                XMLHttpRequest.callbacks[i]( this );
+            for (i = 0; i < XMLHttpRequest.callbacks.length; i++) {
+                XMLHttpRequest.callbacks[i](this);
             }
             // call the native send()
             oldSend.apply(this, arguments);
