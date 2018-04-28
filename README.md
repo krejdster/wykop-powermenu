@@ -36,6 +36,11 @@ Aby zainstalować skrypt, należy wykonać dwa proste kroki.
 ## Changelog
 
 
+**Wersja 3.1 (28 kwiecień 2018)**
+- ___Nowość:___ Najechanie kursorem na avatar od razu wysuwa menu. Kliknięcie avatara natychmiast przenosi do strony profilu użytkownika.
+- ___Poprawka kompatybilności:___ Przycisk "Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów" znów działa prawidłowo.
+
+
 **Wersja 3.0 (26 marzec 2018)**
 
 - ___Nowość:___ Funkcjonalność dodana na prośbę użytkowników - po najechaniu na przycisk, pojawia się wykopowy panel z wpisami dla danej sekcji powiadomień. Bezpośrednie kliknięcie w przycisk - niezmiennie przenosi do najnowszego nieodczytanego powiadomienia.

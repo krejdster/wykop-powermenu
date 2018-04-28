@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Wprowadza klikalne ikonki powiadomień i dodatkowe przycisku w menu.
-// @version      3.0
-// @released     2018-03-26
+// @version      3.1
+// @released     2018-04-28
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
 // @match        *://www.wykop.pl/*
@@ -36,6 +36,8 @@ window.onload = function () {
     bindButtonEvents('bell', '.bell', '#powerButtonNextNotification');
     bindButtonEvents('envelope', '.m-user', '#powerButtonNextPrivateMessage');
     bindButtonEvents('tag', '.m-tag', '#powerButtonNextTag');
+    bindButtonEventsForAllTags();
+    bindButtonEventsForAvatar();
     bindBadgesCheck();
     makePowerButtonsClickable();
 };
@@ -209,7 +211,7 @@ function addPowerButtons() {
     `);
 
     tagContainer.insertAdjacentHTML('beforeend', `
-        <a id="powerButtonAllTags" class="dropdown-show hashtag power-button not-active-yet" href="` + _getProtocol() + `//www.wykop.pl/powiadomienia/unreadtags/" title="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów" alt="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów">
+        <a id="powerButtonAllTags" class="dropdown-show hashtag power-button not-active-yet" href="#" title="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów" alt="Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów">
             <div class="power-button-circle">&nbsp;</div>
             #
         </a>
@@ -420,6 +422,54 @@ function bindButtonEvents(sourceId, sourceClass, powerButtonId) {
                 });
         }
 
+    });
+
+}
+
+/**
+ * Bind button events for All Tags
+ *
+ * Redirects user to a special page which lists 50 latest
+ * and unread entries of followed tags.
+*/
+function bindButtonEventsForAllTags() {
+
+    // Click
+
+    $('body').on('click', '#powerButtonAllTags', function (event) {
+        window.location = _getProtocol() + '//www.wykop.pl/powiadomienia/unreadtags/';
+    });
+
+}
+
+/**
+ * Bind button events for Avatar
+ *
+ * Brings back the old way avatar button worked.
+ * When clicked, simply redirects user to his profile.
+*/
+function bindButtonEventsForAvatar() {
+
+    let avatarButtonClass = '.logged-user .dropdown-show';
+
+    // Click
+
+    $('body').on('click', avatarButtonClass, function (event) {
+        event.preventDefault();
+        window.location = $(this).attr('href');
+    });
+
+    // Mouse enter
+
+    $('body').on('mouseenter', avatarButtonClass, function (event) {
+        event.preventDefault();
+        $(avatarButtonClass).addClass('show-next-drop');
+    });
+
+    // Mouse leave
+
+    $('body').on('mouseleave', avatarButtonClass, function (event) {
+        $(avatarButtonClass).removeClass('show-next-drop');
     });
 
 }
