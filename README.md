@@ -36,6 +36,10 @@ Aby zainstalować skrypt, należy wykonać dwa proste kroki.
 ## Changelog
 
 
+**Wersja 3.2 (12 maj 2018)**
+- ___Bugfix:___ Kliknięcie ikonki dzwoneczka współdziałało tylko z mikroblogiem i nie przenosiło użytkownika do najnowszego powiadomienia ze strony głównej / wykopaliska. Problem został rozwiązany.
+
+
 **Wersja 3.1 (28 kwiecień 2018)**
 - ___Nowość:___ Najechanie kursorem na avatar od razu wysuwa menu. Kliknięcie avatara natychmiast przenosi do strony profilu użytkownika.
 - ___Poprawka kompatybilności:___ Przycisk "Pokaż 50 kolejnych nieprzeczytanych wpisów z tagów" znów działa prawidłowo.

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Wprowadza klikalne ikonki powiadomień i dodatkowe przycisku w menu.
-// @version      3.1
-// @released     2018-04-28
+// @version      3.2
+// @released     2018-05-12
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
 // @match        *://www.wykop.pl/*
@@ -528,7 +528,7 @@ function _parseLinksFromNotificationContainer(sourceClass) {
 
     $(sourceElement).each(function (index, value) {
         let href = $(this).attr('href');
-        if (href.match(/wpis\//i) || href.match(/wiadomosc-prywatna/i)) {
+        if (href.match(/(wpis|link)\//i) || href.match(/wiadomosc-prywatna/i)) {
             links.push({
                 url: $(this).attr('href'),
                 isNew: !!$(this).closest('li').hasClass('type-light-warning')
