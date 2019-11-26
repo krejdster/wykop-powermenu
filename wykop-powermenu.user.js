@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wykop PowerMenu
 // @description  Wprowadza klikalne ikonki powiadomień i dodatkowe przycisku w menu.
-// @version      3.2
-// @released     2018-05-12
+// @version      3.3
+// @released     2019-11-26
 // @copyright    krejd
 // @namespace    http://www.wykop.pl/*
 // @match        *://www.wykop.pl/*
@@ -33,13 +33,15 @@ let poller = setInterval(function () {
 // Bind events when page is loaded
 
 window.onload = function () {
-    bindButtonEvents('bell', '.bell', '#powerButtonNextNotification');
-    bindButtonEvents('envelope', '.m-user', '#powerButtonNextPrivateMessage');
-    bindButtonEvents('tag', '.m-tag', '#powerButtonNextTag');
-    bindButtonEventsForAllTags();
-    bindButtonEventsForAvatar();
-    bindBadgesCheck();
-    makePowerButtonsClickable();
+    setTimeout(function() {
+        bindButtonEvents('bell', '.bell', '#powerButtonNextNotification');
+        bindButtonEvents('envelope', '.m-user', '#powerButtonNextPrivateMessage');
+        bindButtonEvents('tag', '.m-tag', '#powerButtonNextTag');
+        bindButtonEventsForAllTags();
+        bindButtonEventsForAvatar();
+        bindBadgesCheck();
+        makePowerButtonsClickable();
+    }, 60);
 };
 
 // ######################

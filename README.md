@@ -36,6 +36,10 @@ Aby zainstalować skrypt, należy wykonać dwa proste kroki.
 ## Changelog
 
 
+**Wersja 3.3 (26 listopad 2019)**
+- ___Bugfix:___ Naprawiono błąd dla Firefox >70 w którym ikony nie wyświetlały się prawidłowo po załadowaniu strony. ([#3](https://github.com/krejdster/wykop-powermenu/issues/3))
+
+
 **Wersja 3.2 (12 maj 2018)**
 - ___Bugfix:___ Kliknięcie ikonki dzwoneczka współdziałało tylko z mikroblogiem i nie przenosiło użytkownika do najnowszego powiadomienia ze strony głównej / wykopaliska. Problem został rozwiązany.
 
