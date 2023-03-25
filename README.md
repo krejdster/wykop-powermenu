@@ -1,3 +1,5 @@
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 ## Czym jest dodatek Wykop PowerMenu?
 
 Jest to prosta wtyczka `user.js`, która lekko poprawia użyteczność serwisu Wykop.pl. Przyspiesza i ułatwia korzystanie z podstawowych funkcjonalności, takich jak:
